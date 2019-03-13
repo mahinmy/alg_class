@@ -135,7 +135,19 @@ public:
     // TODO
     // Insert at location such that order is preserved
     void sortedInsert(T x){
-        
+        if(x<=Get(0)){
+            Insert(0,x);
+            return;
+        }
+        int i;
+        for(i=0;i<length-1;i++){
+            if(Get(i)<=x && x<=Get(i+1)){
+                Insert(i+1,x);
+                break;
+            }
+        }
+        if(i==length-1)
+            InsertLast(x);
     }
     
 };
