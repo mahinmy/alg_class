@@ -133,8 +133,45 @@ public:
     }
     
 };
-
+/*api:Insert(i,x),InsertLast(x),Delete(i),Locate(x),Get(i),printList(),Length()*/
+struct vecData{
+    int position;
+    int data;
+};
 int main(){
-    
+    LinkList<vecData> a=LinkList<vecData>();
+    LinkList<vecData> b=LinkList<vecData>();
+    /*a = new LinkList<vecData>();
+    b = new LinkList<vecData>();*/
+    int s,t;
+    cin>>s;
+    while(s!=-1){
+        cin>>t;
+        struct vecData input={s,t};
+        a.InsertLast(input);
+        cin>>s;
+    }
+    cin>>s;
+    while(s!=-1){
+        cin>>t;
+        struct vecData input={s,t};
+        b.InsertLast(input);
+        cin>>s;
+    }
+    //finish input
+    int sum=0;
+    int i,j;
+    for(i=0;i<a.Length();i++){
+        for(j=0;j<b.Length();j++){
+            int positionA = a.Get(i).position;
+            int positionB = b.Get(j).position;
+            if(positionA == positionB){
+                int dataA = a.Get(i).data;
+                int dataB = b.Get(j).data;
+                sum+=dataA*dataB;
+            }
+        }
+    }
+    cout<<sum;
     return 0;
 }
