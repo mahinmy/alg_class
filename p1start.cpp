@@ -62,6 +62,21 @@ public:
 
 bool pBal(string S){
     // TODO
+    LinkStack<char> *A=new LinkStack<char>();
+    for(int i=0;i<S.length();i++){
+        if(S[i]=='('||S[i]=='['||S[i]=='{') A->Push(S[i]);
+        else if(S[i]==')'||S[i]==']'||S[i]=='}'){
+            if(!A->IsEmpty()){
+                char t=A->GetTop();
+                if((S[i]==')' && t=='(')||(S[i]=='}' && t=='{')||(S[i]==']' && t=='['))
+                    t=A->Pop();
+                else return false;
+            }
+            else return false;
+        }
+    }
+    if(A->IsEmpty()) return true;
+    else return false;
 }
 
 int main(){
