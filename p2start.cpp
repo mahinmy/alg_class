@@ -48,12 +48,14 @@ public:
     void Insert(int i, T x){
         Node<T> *p = first, *s = NULL;
         int count = -1;
-        if(i<0) throw "Bad index";
+        if(i<0)
+            throw "Bad index";
         while(p!=NULL && count < i-1){ //seek (i-1)-th point
             p = p-> next;
             count++;
         }
-        if(p==NULL) throw "Bad index";
+        if(p==NULL)
+            throw "Bad index";
         else{
             s = new Node<T>;
             s->data = x;
@@ -78,12 +80,14 @@ public:
         Node<T> *p = first, *q = NULL;
         T x;
         int count=-1;
-        if(i<0) throw "Bad index";
+        if(i<0)
+            throw "Bad index";
         while(p!=NULL && count < i-1){ //seek (i-1)-th point
             p = p-> next;
             count++;
         }
-        if(p==NULL || p->next == NULL) throw "Bad index";
+        if(p==NULL || p->next == NULL)
+            throw "Bad index";
         else{
             q=p->next;
             x=q->data;
@@ -120,12 +124,14 @@ public:
     T Get(int i){
         Node<T> *p = first;
         int count=-1;
-        if(i<0) throw "Bad index";
+        if(i<0)
+            throw "Bad index";
         while(p!=NULL && count < i){ //seek i-th point
             p = p-> next;
             count++;
         }
-        if(p==NULL) throw "Bad index";
+        if(p==NULL)
+            throw "Bad index";
         return p->data;
     }
 
@@ -149,11 +155,13 @@ class LinkQueue{
             q.InsertLast(x);
         }
         T DeQueue(){
-            if(q.Length()==0) throw "Queue Empty";
+            if(q.Length()==0)
+                throw "Queue Empty";
             return q.Delete(0);
         }
         T PeekQueue(){
-            if(q.Length()==0) throw "Queue Empty";
+            if(q.Length()==0)
+                throw "Queue Empty";
             return q.Get(0);
         }
         bool IsEmpty(){
@@ -174,28 +182,48 @@ class LinkQueue{
 template <class T>
 class SimplePriorityQueue{
     private:
-        
+        LinkList<LinkQueue<T>*> l;
+        int prio;
     public:
         SimplePriorityQueue(){
-            
+            for(int i=0;i<10;i++){
+                LinkQueue<T> *lq=new LinkQueue<T>();
+                l.InsertLast(lq);
+            }
+            prio=10;
         }
         SimplePriorityQueue(int numP){
-            
+            for(int i=0;i<numP;i++){
+                LinkQueue<T> *lq=new LinkQueue<T>();
+                l.InsertLast(lq);
+            }
+            prio=numP;
         }
         ~SimplePriorityQueue(){
-            
+            while(l.Length()!=0){
+                l.Delete(0);
+            }
         }
         void EnQueue(T x, int p){ //the int here is for priority
-            
+            l.Get(p)->EnQueue(x);
         }
         T DeQueue(){
-            
+            for(int i=0;i<prio;i++){
+                if(!l.Get(i)->IsEmpty())
+                    return l.Get(i)->DeQueue();
+            }
         }
         T PeekQueue(){
-            
+            for(int i=0;i<prio;i++){
+                if(!l.Get(i)->IsEmpty())
+                    return l.Get(i)->PeekQueue();
+            }
         }
         bool IsEmpty(){
-            
+            for(int i=0;i<prio;i++)
+                if(!l.Get(i)->IsEmpty())
+                    return false;
+            return true;
         }
 };
 
@@ -204,6 +232,7 @@ int main(){
     SimplePriorityQueue<char> spq(6);
     cout << "Before insertion, queue is " << (spq.IsEmpty()?"empty":"non-empty") << endl;
     int priors[17]={0,1,2,3,4,5,0,3,2,4,0,2,1,5,1,3,2};
+    //             {a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q}
     for(int i=0;i<17;i++){
         spq.EnQueue('a'+i,priors[i]);
     }
