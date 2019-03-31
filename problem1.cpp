@@ -161,14 +161,17 @@ class SparseMatrix{
     private:
         LinkList<SNode<T>*> *l=new LinkList<SNode<T>*>();
         int row,col;
+        int len;
     public:
         SparseMatrix(){
             row=10;
             col=10;
+            len=0;
         }
         SparseMatrix(int r, int c){
             row=r;
             col=c;
+            len=0;
         }
         ~SparseMatrix(){
             for(int i=0;i<l->Length();i++)
@@ -176,19 +179,37 @@ class SparseMatrix{
             delete l;
         }
         void setEntry(int rPos, int cPos, T x){
-        	if(x==0) return;
-            for(int i=0;i<l->Length();i++){
-                if(l->Get(i)->row==rPos && l->Get(i)->col==cPos){
-                    l->Get(i)->data = x;
-                    return;
-                }
-            }
-            SNode<T> *tmp;
-            tmp=new SNode<T>;
-            tmp->data=x;
-            tmp->row=rPos;
-            tmp->col=cPos;
-            l->InsertLast(tmp);
+        	SNode<T>* S=new SNode<T>();
+			int i=0;
+            S->row=rPos;
+            S->col=cPos;
+            S->data=x;
+			if(len==0) {
+				l->InsertLast(S);
+			}
+			else if(len!=0){
+             	for(i=0;i<len;){
+					if(rPos<(l->Get(i))->row){
+						l->Insert(i,S);
+						break;
+					}
+					else if(rPos==(l->Get(i))->row){
+						if(cPos==(l->Get(i))->col) {
+							l->Set(i,S);
+							len--;
+							break;
+						}
+						else if((l->Get(i))->col>cPos){
+							l->Insert(i,S);
+							break;
+						}
+						else i++;
+					}
+					else i++;
+				}
+            	if(i==len) l->InsertLast(S);
+			}
+            len++;
         }
         T getEntry(int rPos, int cPos){
             for(int i=0;i<l->Length();i++){
