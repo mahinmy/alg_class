@@ -289,7 +289,7 @@ class LTree{
             if(numChild != 0){
                 tmp = children.Get(0)->height();
             }
-            for(i = 0; i < numChild; i++)
+            for(i = 1; i < numChild; i++)
             {
                 if (children.Get(i)->height() > tmp) {
                     tmp = children.Get(i)->height();
@@ -311,23 +311,43 @@ class LTree{
         }
 
         int countNodeWithDeg(int x){
-            int count = 0,i;
-            if(numChild == x) count++;
-            for(i=0;i<numChild;i++){
-                count += children.Get(i)->countNodeWithDeg(x);
+            LinkQueue<LTree<T> *> q;
+            int count = 0;
+            q.EnQueue(this);
+            LTree<T>* tmp;
+            while(!q.IsEmpty()){
+                tmp = q.DeQueue();
+                if(tmp->numChild == x){
+                    count += 1;
+                }
+                for(int i=0;i<tmp->numChild;i++){
+                    q.EnQueue(tmp->children.Get(i));
+                }
             }
-            
+            return count;
         }
 
 
         // problem 3
         bool isDescendentOf(LTree<T> * lt){
-            //test whether the current tree is a descendent of lt.
+            return lt->isAncestorOf(this);
         }
 
         bool isAncestorOf(LTree<T> * lt){
-            //test whether current node is ancestor of lt.
-
+            if(lt == this) return false;
+            LinkQueue<LTree<T> *> q;
+            q.EnQueue(this);
+            LTree<T>* tmp;
+            while(!q.IsEmpty()){
+                tmp = q.DeQueue();
+                if(tmp == lt){
+                    return true;
+                }
+                for(int i=0;i<tmp->numChild;i++){
+                    q.EnQueue(tmp->children.Get(i));
+                }
+            }
+            return false;
         }
 };
 
@@ -426,9 +446,8 @@ void test3(){
 }
 
 int main(){
-    test1();
-    test2();
-    /*test3();*/
+    //test1();
+    /*test2();*/
+    test3();
     return 0;
 }
-
