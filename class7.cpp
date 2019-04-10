@@ -334,6 +334,37 @@ class BinTree{
 
         // ques 3
         T weightedPathLength(){
+            LinkQueue<BinTree<T> *> q;
+            int length = 0;
+            q.EnQueue(this);
+            length += 1;
+            T sum=0;
+            int height = 0;
+            while(length != 0){
+                int l = length;
+                for(int i = 0;i < l;i++){
+                    BinTree<T> *tmp = q.DeQueue();
+                    length -= 1;
+                    if(tmp->left == NULL && tmp->right == NULL){
+                        sum = sum + height * tmp->data;
+                    }
+                    else if(tmp->left != NULL && tmp->right == NULL){
+                        q.EnQueue(tmp->left);
+                        length += 1;
+                    }
+                    else if(tmp->left == NULL && tmp->right != NULL){
+                        q.EnQueue(tmp->right);
+                        length += 1;
+                    }
+                    else if(tmp->left != NULL && tmp->right != NULL){
+                        q.EnQueue(tmp->left);
+                        q.EnQueue(tmp->right);
+                        length += 2;
+                    }
+                }
+                height++;
+            }
+            return sum;
             
         }
 
@@ -478,11 +509,7 @@ void test4(){
 }
 
 int main(){
-    /*test0();
-    test1();
-    test2();
-    test3();*/
-    test4();
+    test3();
     return 0;
 }
 
