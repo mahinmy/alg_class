@@ -394,6 +394,51 @@ class BinTree{
         }
 };
 
+template <class T>
+BinTree<T>* buildFromPreIn(T* preArr, T* inArr, int n){
+    //pre第一个节点是根节点
+    T root = preArr[0];
+    BinTree<T> *q = new BinTree<T>(root);
+    //找到根结点在inarr出现的位置
+    int posRoot;
+    for(posRoot = 0;posRoot<n;posRoot++){
+        if(inArr[posRoot] == root)
+            break;
+    }
+    //中序根结点左边的东西就是左子树，如果为空，左子树不干活
+    if(posRoot==0)
+        ;
+    else{
+        T* leftIn = new T[posRoot];
+        for(int i=0;i<posRoot;i++){
+            leftIn[i]=inArr[i];
+        }
+        //前序的前同样多个位置就是左子树的前序数组，根结点除外
+        T* leftPre = new T[posRoot];
+        for(int i=0;i<posRoot;i++){
+            leftPre[i]=preArr[i+1];
+        }
+        BinTree<T> *leftChild = buildFromPreIn(leftPre,leftIn,posRoot);
+        q->addLChild(leftChild);
+    }
+    //右子树情况：根结点后面的就是右子树
+    if(posRoot == n-1)
+        ;
+    else{
+        T* rightIn = new T[n - posRoot - 1];
+        for(int i=posRoot+1;i<n;i++){
+            rightIn[i-posRoot-1]=inArr[i];
+        }
+        //前序的前同样多个位置就是左子树的前序数组，根结点除外
+        T* rightPre = new T[n - posRoot - 1];
+        for(int i=posRoot+1;i<n;i++){
+            rightPre[i-posRoot-1]=preArr[i];
+        }
+        BinTree<T> *rightChild = buildFromPreIn(rightPre,rightIn,n-posRoot-1);
+        q->addRChild(rightChild);
+    }
+    return q;
+}
 void test0(){
     BinTree<char> * treeA = new BinTree<char>('A');
     treeA->addLChild('B');
@@ -508,8 +553,16 @@ void test4(){
     cout << (treeK->isComplete() ? "Yes" : "No") << " ";
 }
 
+void test5(){
+    int pre[9]={1,2,3,4,5,6,7,8,9};
+    int mid[9]={2,3,1,5,4,7,8,6,9};
+    BinTree<int> *q = buildFromPreIn(pre,mid,9);
+    q->printPreOrderR();
+    cout<<endl;
+    q->printInOrderR();
+}
 int main(){
-    test3();
+    test5();
     return 0;
 }
 
