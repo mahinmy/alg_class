@@ -355,18 +355,64 @@ class BinTree{
             }
         }
 };
-
 bool isPrefixCode(string* codes, int numCodes){
     // codes[0], codes[1], ..., codes[numCodes-1] are all the codes
     // each code is a string of 0's and 1's.
     // the job is to determine whether the given code is a prefix code.
-    
+
     // TODO
+    //whether codes only contain 0 and 1
+    for(int i=0;i<numCodes;i++){
+        for(int j=0;j<codes[i].length();j++){
+            if(codes[i][j] != '0' && codes[i][j] != '1'){
+                return false;
+            }
+        }
+    }
+    //bubble sort
+    bool swapped = true;
+    while(swapped){
+        swapped = false;
+        for(int i=0;i<numCodes-1;i++){
+            if(codes[i].length()>codes[i+1].length()){
+               string tmp = codes[i];
+               codes[i] = codes[i+1];
+               codes[i+1] = tmp;
+               swapped = true;
+            }
+        }
+    }
+    for(int i=0;i<numCodes-1;i++){
+        for(int j=i+1;j<numCodes;j++){
+            if(codes[i] == codes[j].substr(0,codes[i].length())){
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 void printDecode(char* charSet, string* codeSet, int numCodes, string encodedStr){
     // if given coding is invalid, cout << "Bad code" << endl;
     // TODO
+    bool newcode = true;
+    string tmp="";
+    for(int i=0;i<encodedStr.length();i++){
+        if(newcode){
+            tmp="";
+            tmp = tmp + encodedStr[i];
+            newcode = false;
+        }
+        else{
+            tmp = tmp + encodedStr[i];
+        }
+        for(int j=0;j<numCodes;j++){
+            if(tmp == codeSet[j]){
+                cout<<charSet[j];
+                newcode = true;
+            }
+        }
+    }
 }
 
 void test1p1(){ // test for validity of isPrefixCode
