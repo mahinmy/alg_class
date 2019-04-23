@@ -305,6 +305,7 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
         VecList<T> verList; // list of vertices
         int** adjMatrix;
         bool directed;
+        int *color;
 
         //helper BFS
         void printBFShelp(int vInd, bool* visited){
@@ -332,6 +333,29 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
                     printDFShelp(i,visited);
                 }
             }
+        }
+        bool helpBipartite(int s){
+            color = new int[numVer];
+            for(int i=0;i<numVer;i++){
+                color[i]=0;
+            }
+            color[s]=1;
+            LinkQueue<int> q;
+            q.EnQueue(s);
+            while(!q.IsEmpty()){
+                int front = q.PeekQueue();
+                q.DeQueue();
+                for(int i=0;i<numVer;i++){
+                    if(adjMatrix[front][i] && color[i]==0){
+                        q.EnQueue(i);
+                        color[i]=-color[front];
+                    }
+                    if(adjMatrix[front][i] && color[i]==color[front]){
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
     public:
         AMGraph(){ // we don't want this used.
@@ -460,52 +484,32 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
         //get a subgraph of the vertices given with all the related edges
         AMGraph<T>* subgraph(T* vList, int n){ //ques 1
             // TODO
-			AMGraph<T>* A = new AMGraph<T>(vList,n);
+			AMGraph<T>* p = new AMGraph<T>(vList,n);
 			int sIndex,eIndex;
 			for(int i=0;i<n;i++){
 				sIndex = verList.Locate(vList[i]);
 				for(int j=i;j<n;j++){
 					eIndex=verList.Locate(vList[j]);
 					if(adjMatrix[sIndex][eIndex]==1){
-						A->addEdge(vList[i], vList[j]);
+						p->addEdge(vList[i], vList[j]);
 					}
 				}
 			}
-			return A;
+			return p;
         }
 
         //returns whether it's bipartite or not, and print the two groups if it is.
         // starting graph is connected and undirected.
         bool isBipartite(){ //ques 2
             // TODO
-            int* l=new int[numVer];
-            int i,j;
-            for(i=0;i<numVer;i++){
-                l[i]=0;
+            for(int i=0;i<numVer;i++){
+                color[i]=0;
             }
-            if(numVer>0){
-                l[0]=1;
-                for(i=0;i<numVer;i++){
-                    if(l[i]==1){
-                        for(j=0;j<numVer;j++){
-                            if(adjMatrix[i][j]==1){
-                                l[j]=2;
-                            }
-                        }
-                    }
-                    if(l[i]==2){
-                        for(j=0;j<numVer;j++){
-                            if(adjMatrix[i][j]==1){
-                                l[j]=1;
-                            }
-                        }
-                    }
-                }
+            for(int i=0;i<numVer;i++){
+                if(color[i] == 0 && !helpBipartite(i))
+                    return false; 
             }
-            for(i=0;i<numVer;i++){
-                cout<<verList.Get(i)<<": group "<<l[i]<<endl;
-            }
-            
+            return true;
         }
 };
 
