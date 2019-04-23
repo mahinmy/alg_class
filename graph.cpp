@@ -305,7 +305,7 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
         VecList<T> verList; // list of vertices
         int** adjMatrix;
         bool directed;
-        int *color;
+        int *color=new int[numVer];
 
         //helper BFS
         void printBFShelp(int vInd, bool* visited){
@@ -335,10 +335,6 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
             }
         }
         bool helpBipartite(int s){
-            color = new int[numVer];
-            for(int i=0;i<numVer;i++){
-                color[i]=0;
-            }
             color[s]=1;
             LinkQueue<int> q;
             q.EnQueue(s);
@@ -508,6 +504,16 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
             for(int i=0;i<numVer;i++){
                 if(color[i] == 0 && !helpBipartite(i))
                     return false; 
+            }
+            int output=1;
+            for(int i=0;i<numVer;i++){
+                if(i==0){
+                    cout<<verList.Get(i)<<": group "<<output<<endl;
+                }
+                else{
+                    output = color[i]==color[0]?1:2;
+                    cout<<verList.Get(i)<<": group "<<output<<endl;
+                }
             }
             return true;
         }
