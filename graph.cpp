@@ -261,7 +261,7 @@ class VecList{
             for(int i = 0;i<length;i++){
                 if(data[i]==x) return i;
             }
-            return 0;
+            return -1;
         }
         void Insert(int i, T x){
             if(length >= capacity) expand();
@@ -305,7 +305,6 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
         VecList<T> verList; // list of vertices
         int** adjMatrix;
         bool directed;
-        int *color=new int[numVer];
 
         //helper BFS
         void printBFShelp(int vInd, bool* visited){
@@ -333,25 +332,6 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
                     printDFShelp(i,visited);
                 }
             }
-        }
-        bool helpBipartite(int s){
-            color[s]=1;
-            LinkQueue<int> q;
-            q.EnQueue(s);
-            while(!q.IsEmpty()){
-                int front = q.PeekQueue();
-                q.DeQueue();
-                for(int i=0;i<numVer;i++){
-                    if(adjMatrix[front][i] && color[i]==0){
-                        q.EnQueue(i);
-                        color[i]=-color[front];
-                    }
-                    if(adjMatrix[front][i] && color[i]==color[front]){
-                        return false;
-                    }
-                }
-            }
-            return true;
         }
     public:
         AMGraph(){ // we don't want this used.
@@ -477,46 +457,52 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
             }
             cout << endl;
         }
-        //get a subgraph of the vertices given with all the related edges
-        AMGraph<T>* subgraph(T* vList, int n){ //ques 1
-            // TODO
-			AMGraph<T>* p = new AMGraph<T>(vList,n);
-			int sIndex,eIndex;
-			for(int i=0;i<n;i++){
-				sIndex = verList.Locate(vList[i]);
-				for(int j=i;j<n;j++){
-					eIndex=verList.Locate(vList[j]);
-					if(adjMatrix[sIndex][eIndex]==1){
-						p->addEdge(vList[i], vList[j]);
-					}
-				}
-			}
-			return p;
-        }
 
-        //returns whether it's bipartite or not, and print the two groups if it is.
-        // starting graph is connected and undirected.
-        bool isBipartite(){ //ques 2
-            // TODO
-            for(int i=0;i<numVer;i++){
-                color[i]=0;
+        // Question 1
+        bool isStarShaped(){
+            if(numEdge!=numVer-1){
+                return false;
             }
+            int count1=0;
+            int count2=0;
             for(int i=0;i<numVer;i++){
-                if(color[i] == 0 && !helpBipartite(i))
-                    return false; 
-            }
-            int output=1;
-            for(int i=0;i<numVer;i++){
-                if(i==0){
-                    cout<<verList.Get(i)<<": group "<<output<<endl;
+                int next = 0;
+                for(int j=0;j<numVer;j++){
+                    if(adjMatrix[i][j]==1){
+                        next += 1;
+                    }
                 }
-                else{
-                    output = color[i]==color[0]?1:2;
-                    cout<<verList.Get(i)<<": group "<<output<<endl;
+                if(next==1){
+                    count1 += 1;
                 }
+                else if(next==numVer-1){
+                    count2 += 1;
+                    if(count2>2){
+                        return false;
+                    }
+                }
+                else return false;
             }
             return true;
         }
+
+        // Question 2
+        bool isCycleGraph(){
+            // TODO
+            // assume undirected graph
+        }
+
+        // Question 3
+        bool loopTest(){ // returns whether there is a cycle or not
+            // TODO
+        }
+
+        // Question 4
+        bool existsEulerianPath(){
+            //assume undirected
+            // TODO
+        }
+
 };
 
 // put something that multiplies matrix, just for demonstrating meaning of A^k
@@ -530,7 +516,33 @@ void printMatrix(int ** mat, int n){
     }
 }
 
-int test1(){
+// multiply 2 square matrices
+int** mulMatrix(int ** mat1, int ** mat2, int n){
+    int** tmp = new int*[n];
+    for(int i=0;i<n;i++){
+        tmp[i] = new int[n];
+        for(int j=0;j<n;j++){
+            tmp[i][j] = 0;
+            for(int k=0;k<n;k++){
+                tmp[i][j] += mat1[i][k] * mat2[k][j];
+            }
+        }
+    }
+    return tmp;
+}
+
+int** addMatrix(int ** mat1, int ** mat2, int n){
+    int** tmp = new int*[n];
+    for(int i=0;i<n;i++){
+        tmp[i] = new int[n];
+        for(int j=0;j<n;j++){
+            tmp[i][j] = mat1[i][j]+mat2[i][j];
+        }
+    }
+    return tmp;
+}
+
+void test0(){
     int ver[9] = {1,2,3,4,5,6,7,8,9};
     Edge<int>* edges[10];
     edges[0] = new Edge<int>{1,2};
@@ -545,43 +557,141 @@ int test1(){
     edges[9] = new Edge<int>{9,6};
 
     AMGraph<int> amg1(ver,9,edges,10);
+    AMGraph<int> amg2(ver,9,edges,10,true);
+
+    //amg1.addEdge(7,3);
+    //amg1.addEdge(7,4);
+
+    //amg2.addEdge(3,7);
+    //amg2.addEdge(7,9);
+    //amg2.removeEdge(6,8);
 
     cout << "Graph 1: " << endl;
     amg1.printGraph();
     cout << "Adjacency Matrix:" << endl;
     printMatrix(amg1.getMatrix(),9);
-    cout << endl;
+    cout << "BFS:" << endl;
+    amg1.printBFS();
+    cout << "DFS:" << endl;
+    amg1.printDFS();
 
-    int ver2[6] = {1,2,3,7,5,8};
-
-    AMGraph<int>* amg2 = amg1.subgraph(ver2,6);
     cout << "Graph 2: " << endl;
-    amg2->printGraph();
+    amg2.printGraph();
     cout << "Adjacency Matrix:" << endl;
-    printMatrix(amg2->getMatrix(),6);
-    cout << endl;
-    return 0;
+    printMatrix(amg2.getMatrix(),9);
+    cout << "BFS:" << endl;
+    amg2.printBFS();
+    cout << "DFS:" << endl;
+    amg2.printDFS();
+
+    cout << "Below is demonstration for powers of Adjacency matrix (for graph 1)" << endl;
+    int** amg1_m1 = amg1.getMatrix();
+    int** amg1_m2 = mulMatrix(amg1_m1,amg1_m1,9);
+    int** amg1_m3 = mulMatrix(amg1_m1,amg1_m2,9);
+    int** amg1_m4 = mulMatrix(amg1_m1,amg1_m3,9);
+    int** amg1_m5 = mulMatrix(amg1_m1,amg1_m4,9);
+    int** amg1_m6 = mulMatrix(amg1_m1,amg1_m5,9);
+    int** amg1_m7 = mulMatrix(amg1_m1,amg1_m6,9);
+    int** amg1_m8 = mulMatrix(amg1_m1,amg1_m7,9);
+    int** amg1_m9 = mulMatrix(amg1_m1,amg1_m8,9);
+    int** result = addMatrix(amg1_m1,amg1_m2,9);
+    result = addMatrix(amg1_m3,result,9);
+    result = addMatrix(amg1_m4,result,9);
+    result = addMatrix(amg1_m5,result,9);
+    result = addMatrix(amg1_m6,result,9);
+    result = addMatrix(amg1_m7,result,9);
+    result = addMatrix(amg1_m8,result,9);
+    result = addMatrix(amg1_m9,result,9);
+    printMatrix(result,9);
 }
 
-int test2(){
-    int ver[5] = {1,2,3,4,5};
-    AMGraph<int> amg1(ver,5);
-    amg1.addEdge(3,4);
-    amg1.addEdge(3,5);
-    amg1.addEdge(1,3);
-    amg1.addEdge(2,4);
-    amg1.addEdge(2,5);
-    cout << (amg1.isBipartite() ? "Bipartite" : "Not bipartite") << endl;
+void test1(){
+    int tmp1[8] = {1,2,3,4,5,6,7,8};
+    AMGraph<int> amg1(tmp1,8);
+    for(int i=1;i<8;i++){
+        amg1.addEdge(i,8);
+    }
+    cout << "Graph 1 is " << (amg1.isStarShaped() ? "" : "not ") << "star-shaped" << endl;
 
-    amg1.addEdge(1,4);
-    cout << (amg1.isBipartite() ? "Bipartite" : "Not bipartite") << endl;
+    amg1.addEdge(5,6);
+    cout << "Graph 3 is " << (amg1.isStarShaped() ? "" : "not ") << "star-shaped" << endl;
+}
 
-    return 0;
+void test2(){
+    int tmp[6] = {0,1,2,3,4,5};
+    AMGraph<int> amg1(tmp,6);
+    for(int i=0;i<6;i++){
+        amg1.addEdge(i,((i+1) % 6));
+    }
+    cout << "Graph 1 is " << (amg1.isCycleGraph() ? "" : "not ") << "a cycle graph" << endl;
+
+    amg1.removeEdge(4,5);
+    amg1.addEdge(4,0);
+    cout << "Graph 3 is " << (amg1.isCycleGraph() ? "" : "not ") << "a cycle graph" << endl;
+}
+
+void test3(){
+    char ver2[5] = {'A','B','C','D','E'};
+    AMGraph<char> amg2(ver2, 5, true);
+    amg2.addEdge('A','B');
+    amg2.addEdge('A','D');
+    amg2.addEdge('A','E');
+    amg2.addEdge('B','C');
+    amg2.addEdge('C','E');
+    amg2.addEdge('D','C');
+    amg2.addEdge('D','E');
+
+    cout << "Are there loops in this graph? " << (amg2.loopTest() ? "Yes" : "No") << endl;
+
+    amg2.addEdge('E','A');
+    cout << "Are there loops in this graph? " << (amg2.loopTest() ? "Yes" : "No") << endl;
+
+    int ver[9] = {5,6,7,8,9,1,2,3,4};
+    Edge<int>* edges[10];
+    edges[0] = new Edge<int>{1,2};
+    edges[1] = new Edge<int>{1,3};
+    edges[2] = new Edge<int>{1,4};
+    edges[3] = new Edge<int>{2,3};
+    edges[4] = new Edge<int>{2,4};
+    edges[5] = new Edge<int>{3,4};
+    edges[6] = new Edge<int>{5,8};
+    edges[7] = new Edge<int>{5,9};
+    edges[8] = new Edge<int>{6,8};
+    edges[9] = new Edge<int>{9,6};
+
+    AMGraph<int> amg1(ver,9,edges,10);
+    cout << "Are there loops in this graph? " << (amg1.loopTest() ? "Yes" : "No") << endl;
+
+}
+
+void test4(){
+    int ver[9] = {5,6,7,8,9,1,2,3,4};
+    AMGraph<int> amg0(ver,9);
+    cout << "Eulerian path? " << (amg0.existsEulerianPath() ? "Yes" : "No") << endl;
+    Edge<int>* edges[10];
+    edges[0] = new Edge<int>{1,2};
+    edges[1] = new Edge<int>{1,3};
+    edges[2] = new Edge<int>{1,4};
+    edges[3] = new Edge<int>{2,3};
+    edges[4] = new Edge<int>{2,4};
+    edges[5] = new Edge<int>{3,4};
+    edges[6] = new Edge<int>{5,8};
+    edges[7] = new Edge<int>{5,9};
+    edges[8] = new Edge<int>{6,8};
+    edges[9] = new Edge<int>{9,6};
+    AMGraph<int> amg05(ver,9, edges, 5);
+    cout << "Eulerian path? " << (amg05.existsEulerianPath() ? "Yes" : "No") << endl;
+
+    AMGraph<int> amg1(ver,9,edges,10);
+    cout << "Eulerian path? " << (amg1.existsEulerianPath() ? "Yes" : "No") << endl;
 }
 
 int main(){
+    //test0();
     test1();
-    test2();
+    /*test2();
+    test3();
+    test4();*/
     return 0;
 }
 
