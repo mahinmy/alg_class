@@ -488,19 +488,89 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
 
         // Question 2
         bool isCycleGraph(){
-            // TODO
-            // assume undirected graph
+            //degree of each point is 2
+            for(int i=0;i<numVer;i++){
+                int count2 = 0;
+                for(int j=0;j<numVer;j++){
+                    if(adjMatrix[i][j]==1){
+                        count2 += 1;
+                    }
+                }
+                if(count2!=2){
+                    return false;
+                }
+            }
+            //is connected
+            bool* visited = new bool[numVer];
+            for(int i=0;i<numVer;i++){
+                visited[i]=false;
+            }
+            LinkQueue<int> q;
+            q.EnQueue(0);
+            visited[0] = true;
+            while(!q.IsEmpty()){
+                int tmp = q.DeQueue();
+                for(int i=0;i<numVer;i++){
+                    if(visited[i]==false && adjMatrix[tmp][i]==1){
+                        q.EnQueue(i);
+                        visited[i] = true;
+                    }
+                }
+            }
+            for(int i=0;i<numVer;i++){
+                if(visited[i]==false){
+                    return false;
+                }
+            }
+            return true;
         }
 
         // Question 3
         bool loopTest(){ // returns whether there is a cycle or not
-            // TODO
         }
 
         // Question 4
         bool existsEulerianPath(){
-            //assume undirected
-            // TODO
+            // is connected?
+            bool* visited = new bool[numVer];
+            for(int i=0;i<numVer;i++){
+                visited[i]=false;
+            }
+            LinkQueue<int> q;
+            q.EnQueue(0);
+            visited[0] = true;
+            while(!q.IsEmpty()){
+                int tmp = q.DeQueue();
+                for(int i=0;i<numVer;i++){
+                    if(visited[i]==false && adjMatrix[tmp][i]==1){
+                        q.EnQueue(i);
+                        visited[i] = true;
+                    }
+                }
+            }
+            for(int i=0;i<numVer;i++){
+                if(visited[i]==false){
+                    return false;
+                }
+            }
+            int countodd = 0;
+            for(int i=0;i<numVer;i++){
+                int countDegree = 0;
+                for(int j=0;j<numVer;j++){
+                    if(adjMatrix[i][j]==1){
+                        countDegree += 1;
+                    }
+                }
+                if(countDegree%2==1){
+                    countodd += 1;
+                }
+            }
+            if(countodd==0 || countodd==2){
+                return true;
+            }
+            else{
+                return false;
+            }
         }
 
 };
@@ -688,10 +758,10 @@ void test4(){
 
 int main(){
     //test0();
-    test1();
-    /*test2();
-    test3();
-    test4();*/
+    //test1();
+    //test2();
+    //test3();
+    test4();
     return 0;
 }
 
