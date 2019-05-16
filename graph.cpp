@@ -333,6 +333,44 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
                 }
             }
         }
+        int countBranches(int *g, int n){
+            //g is the numbers of the vertex which have not been visited, n is the size of g
+            if(n == 1) return 1;
+            int count = 1;
+            bool* visited = new bool[n];
+            for(int i=0;i<n;i++){
+                visited[i]=false;
+            }
+            LinkQueue<int> q;
+            q.EnQueue(0);
+            visited[0] = true;
+            while(!q.IsEmpty()){
+                int tmp = q.DeQueue();
+                for(int i=0;i<n;i++){
+                    if(visited[i]==false && adjMatrix[g[tmp]][g[i]]==1){
+                        q.EnQueue(i);
+                        visited[i] = true;
+                    }
+                }
+            }
+            int countFalse = 0;
+            for(int i=0;i<n;i++){
+                if(visited[i]==false){
+                    countFalse += 1;
+                }
+            }
+            if(countFalse==0) return 1;
+            else{
+                int *newg = new int[countFalse];
+                int j = 0;
+                for(int i=0;i<n;i++){
+                    if(visited[i]==false){
+                        newg[j++]=g[i];
+                    }
+                }
+                return 1 + countBranches(newg, countFalse);
+            }
+        }
     public:
         AMGraph(){ // we don't want this used.
         }
@@ -527,6 +565,54 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
 
         // Question 3
         bool loopTest(){ // returns whether there is a cycle or not
+            if(!directed){
+                int *g = new int[numVer];
+                for(int i=0;i<numVer;i++){
+                    g[i] = i;
+                }
+                int branches = countBranches(g,numVer);
+                if(numEdge + branches > numVer){
+                    return true;
+                }
+                else return false;
+            }
+            else{
+                bool *visited = new bool[numVer];
+                for(int i=0;i<numVer;i++){
+                    visited[i] = false;
+                }
+                int* indegree = new int[numVer];
+                for(int i=0;i<numVer;i++){
+                    indegree[i] = 0;
+                }
+                for(int i=0;i<numVer;i++){
+                    for(int j=0;j<numVer;j++){
+                        if(adjMatrix[i][j]){
+                            indegree[j] += 1;
+                        }
+                    }
+                }
+                for(int i=0;i<numVer;i++){
+                    for(int j=0;j<numVer;j++){
+                        if(indegree[j]==0){
+                            indegree[j]--;
+                            visited[j]=true;
+                            for(int k=0;k<numVer;k++){
+                                if(adjMatrix[j][k]){
+                                    indegree[k]--;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+                for(int i=0;i<numVer;i++){
+                    if(visited[i]==false){
+                        return true;
+                    }
+                }
+                return false;
+            }
         }
 
         // Question 4
@@ -760,8 +846,8 @@ int main(){
     //test0();
     //test1();
     //test2();
-    //test3();
-    test4();
+    test3();
+    //test4();
     return 0;
 }
 
