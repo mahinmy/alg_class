@@ -810,7 +810,79 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
         
         // Question 1:
         void distFromAllTo(T end){
-            // TODO
+            bool* isInS = new bool[numVer];
+            int* curDist = new int[numVer];
+            int* prevNodeIndex = new int[numVer];
+            int lastVisit = verList.Locate(end); //last thing we visited
+            int count = 0; //number of nodes in set S
+            for(int i=0;i<numVer;i++){
+                isInS[i] = false;
+                curDist[i] = -1; //negative distance to denote unreachable
+                prevNodeIndex[i] = -1; //no previous node yet.
+            }
+            isInS[lastVisit] = true;
+            curDist[lastVisit] = 0;
+            count =1;
+
+            while(count < numVer){
+                //update the distances, and track the smallest at the same time
+                int min = -1; //minimum distance
+                int minNodeIndex = -1; //min Node
+                //cout << "Last visited node: " << verList.Get(lastVisit) << endl;
+                for(int i=0;i<numVer;i++){
+                    if(!isInS[i] && adjMatrix[i][lastVisit]>0){ //note that now the direction of edge is important!
+                        if(curDist[i]==-1 || (curDist[i] > curDist[lastVisit] + adjMatrix[i][lastVisit])){
+                            curDist[i] = curDist[lastVisit] + adjMatrix[i][lastVisit];
+                            prevNodeIndex[i] = lastVisit;
+                            //cout << "Updated distance at node: " << verList.Get(i) << endl;
+                        }
+
+                    }
+                    if(!isInS[i] && curDist[i]!=-1 && (min==-1 || (curDist[i] < min))){
+                        min = curDist[i];
+                        minNodeIndex = i;
+                    }
+                }
+                //at this moment, distances updated and minimum is ready.
+                if(min==-1)
+                    count = numVer; //this is to say we are done, since the rest of the nodes are not reachable
+                else{
+                    //cout << "Selected node " << verList.Get(minNodeIndex) << endl;
+                    isInS[minNodeIndex] = true; //put the min Node into the list, and go again.
+                    lastVisit = minNodeIndex;
+                    count++;
+                }
+            }
+
+            //print the results
+            cout << left << setw(18) << "Vertice name" << "Path" << endl;
+            for(int i=0;i<numVer;i++){
+                if(curDist[i]==-1){
+                    cout << left << setw(18) << verList.Get(i) << "Unreachable" << endl;
+                    continue;
+                }
+                LinkStack<int> pathStack;
+                pathStack.Push(i);
+                while(prevNodeIndex[pathStack.GetTop()]!=-1)
+                    pathStack.Push(prevNodeIndex[pathStack.GetTop()]);
+                cout << left << setw(18) << verList.Get(i);
+
+                bool first = true;
+                LinkStack<int> pathStack2;
+                while(!pathStack.IsEmpty()){
+                    pathStack2.Push(pathStack.Pop());
+                }
+                while(!pathStack2.IsEmpty()){
+                    if(first){
+                        cout << verList.Get(pathStack2.Pop());
+                        first = false;
+                    }
+                    else{
+                        cout << " -> " << verList.Get(pathStack2.Pop());
+                    }
+                }
+                cout << ", cost = " << curDist[i] << endl;
+            }
         }
         
         // Question 2
@@ -818,6 +890,19 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
         // assume unweighted graph
         LGraph<T>* getLGraph(){
             // TODO
+            int i,j;
+            LGraph<T>* lgr = new LGraph<T>(directed);
+            for(i=0;i< numVer;i++){
+                lgr->addVertex(verList.Get(i));
+            }
+            for(i=0;i<numVer;i++){
+                for(j=0;j<numVer;j++){
+                    if(adjMatrix[i][j]!=0){
+                        lgr->addEdge(verList.Get(i),verList.Get(j));
+                    }
+                }
+            }
+            return lgr;
         }
         
         // Question 3
@@ -827,6 +912,87 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
         // Label the edges just as 1,2,3,...
         AMGraph<int>* getLineGraph(){
             // TODO
+            int *verArr = new int[numEdge];
+            for(int i=1;i<=numEdge;i++){
+                verArr[i-1]=i;
+            }
+            AMGraph<int>* g;
+            g = new AMGraph<int>(verArr, numEdge);
+            int point1 = 1, point2 = 2;
+            for (int i1 = 0; i1 < numVer; i1++){
+                for(int j1 = i1+1; j1 < numVer; j1++){
+                    if(adjMatrix[i1][j1]==0) continue;
+                    //find the next positions of adjMatrix[i1][j1] 
+                    int next1, next2;
+                    next1 = i1;
+                    next2 = j1 + 1;
+                    if(next2 == numVer){
+                        next1 += 1;
+                        next2 = next1 +1;
+                    }
+                    for(int i2 = next1; i2 < numVer; i2++){
+                        bool flag = i2 == next1;
+                        int j2index = flag ? next2 : i2 + 1;
+                        for(int j2 = j2index; j2 < numVer; j2++){
+                            if(adjMatrix[i2][j2]==0) continue;
+                            if(i1 == i2 || i1 == j2 || j1 == i2 || j1 == j2){
+                                g->addEdge(point1, point2);
+                            }
+                            point2 += 1;
+                            if(point2 > numEdge){
+                                point1 += 1;
+                                point2 = point1 + 1;
+                            }
+                        }
+                    }
+                }
+            }
+            return g;
+            
+        }
+        bool isConnected(){
+            bool* visited = new bool[numVer];
+            for(int i=0;i<numVer;i++){
+                visited[i]=false;
+            }
+            LinkQueue<int> q;
+            q.EnQueue(0);
+            visited[0] = true;
+            while(!q.IsEmpty()){
+                int tmp = q.DeQueue();
+                for(int i=0;i<numVer;i++){
+                    if(visited[i]==false && adjMatrix[tmp][i]==1){
+                        q.EnQueue(i);
+                        visited[i] = true;
+                    }
+                }
+            }
+            for(int i=0;i<numVer;i++){
+                if(visited[i]==false){
+                    return false;
+                }
+            }
+            return true;
+        }
+        AMGraph<T>* criticalEdge(){
+            T *dataArr = new T[numVer];
+            for(int i = 0; i < numVer; i++){
+                dataArr[i] = verList.Get(i);
+            }
+            AMGraph<T> *g = new AMGraph<T>(dataArr, numVer);
+            for(int i = 0; i < numVer; i++){
+                for(int j = i + 1; j < numVer; j++){
+                    if(adjMatrix[i][j] != 0){
+                        int w = adjMatrix[i][j];
+                        this->removeEdge(verList.Get(i), verList.Get(j));
+                        if(!this->isConnected()){
+                            g->addEdge(verList.Get(i), verList.Get(j), w);
+                        }
+                        this->addEdge(verList.Get(i), verList.Get(j), w);
+                    }
+                }
+            }
+            return g;
         }
 };
 
@@ -954,24 +1120,26 @@ void test2(){
 }
 
 void test3(){
-    char ver[5] = {'A','B','C','D','E'};
-    AMGraph<char> amg1(ver,5);
+    char ver[6] = {'A','B','C','D','E','F'};
+    AMGraph<char> amg1(ver,6);
     
     amg1.addEdge('A','B');
-    amg1.addEdge('B','E');
+    amg1.addEdge('B','C');
     amg1.addEdge('A','C');
-    amg1.addEdge('A','D');
     amg1.addEdge('C','D');
-    amg1.addEdge('D','E');
-    
-    amg1.getLineGraph()->printGraph();
+    amg1.addEdge('E','D');
+    amg1.addEdge('F','D');
+    amg1.addEdge('E','F');
+    amg1.printGraph();
+    amg1.criticalEdge()->printGraph();
+    amg1.printGraph();
     cout << endl;
 }
 
 int main(){
-    test0();
-    test1();
-    test2();
+    //test0();
+    //test1();
+    //test2();
     test3();
     return 0;
 }
