@@ -20,14 +20,14 @@ class coinChanger{
             }
         }
         ~coinChanger(){
-            delete coinKinds;
+            if(numCoins > 0)
+                delete coinKinds;
         }
         void clearResults(){
             delete coinUsed;
         }
         void setCoinValueSet(int* coinValueSet, int n){
             numCoins = n;
-            delete coinKinds;
             coinKinds = new int[n];
             for(int i = 0; i < n; i++){
                 coinKinds[i]= coinValueSet[i];

@@ -670,7 +670,7 @@ void testTopo(){
 }
 
 int main(){
-    int m,n;
+    /*int m,n;
     cin>>m>>n;
     int *a = new int[m];
     for(int i=0;i<m;i++){
@@ -687,7 +687,8 @@ int main(){
     }
     else{
 
-    }
+    }*/
+    testTopo();
     return 0;
 }
 
