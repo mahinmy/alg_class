@@ -458,6 +458,22 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
             cout << endl;
         }
 
+        int numPath(int inDegreePos, int outDegreePos){
+            //先找起始点有多少个后继元素
+            int count = 0;
+            int backPoint = 0;
+            for(int i=0;i<numVer;i++){
+                if(adjMatrix[inDegreePos][i] != 0){
+                    if(i == outDegreePos){
+                        count += 1;
+                    }
+                    else{
+                        count += numPath(i, outDegreePos);
+                    }
+                }
+            }
+            return count;
+        }
         int numPathsDAG(){
             // our graph has one source and one sink
             // TODO
@@ -465,8 +481,10 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
             int inDegreePos;
             for(int i=0;i<numVer;i++){
                 int countInDegree = 0;
-                for(int j=0;i<numVer;j++){
-                    countInDegree += adjMatrix[j][i];
+                for(int j=0;j<numVer;j++){
+                    if(adjMatrix[j][i] != 0){
+                        countInDegree += 1;
+                    }
                 }
                 if(countInDegree==0){
                     inDegreePos = i;
@@ -477,8 +495,10 @@ class AMGraph{ //we need the number of vertices fixed if we are using this appro
             int outDegreePos;
             for(int i=0;i<numVer;i++){
                 int countOutDegree = 0;
-                for(int j=0;i<numVer;j++){
-                    countOutDegree += adjMatrix[i][j];
+                for(int j=0;j<numVer;j++){
+                    if(adjMatrix[i][j] != 0){
+                        countOutDegree += 1;
+                    }
                 }
                 if(countOutDegree==0){
                     outDegreePos = i;
@@ -567,7 +587,7 @@ void test2(){
 }
 
 int main(){
-    test1();
+    //test1();
     test2();
     return 0;
 }
